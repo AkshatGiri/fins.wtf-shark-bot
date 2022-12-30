@@ -3,14 +3,15 @@ const fs = require('fs')
 const { BigNumber, providers, Wallet, Contract, utils } = require('ethers')
 
 const { INFURA_API_KEY, WALLET_PRIVATE_KEY } = process.env
+if (!INFURA_API_KEY || !WALLET_PRIVATE_KEY) {
+  throw new Error('Missing .env values')
+}
 
 const CONTRACT = {
   abi: JSON.parse(fs.readFileSync('abi.json', 'utf8')),
   address: '0x99027c41f74b38862f53bda999881d8389fc6a92',
   network: 'mainnet',
 }
-
-console.log(INFURA_API_KEY, WALLET_PRIVATE_KEY)
 
 ////////////////////////
 ////////////////////////
@@ -19,9 +20,10 @@ console.log(INFURA_API_KEY, WALLET_PRIVATE_KEY)
 const provider = new providers.InfuraProvider('mainnet', INFURA_API_KEY)
 
 const wallet = new Wallet(WALLET_PRIVATE_KEY, provider)
-console.log(wallet.address)
 
 const contract = new Contract(CONTRACT.address, CONTRACT.abi, wallet)
+
+console.log('Watching...')
 
 //////////////////////////
 //////////////////////////
