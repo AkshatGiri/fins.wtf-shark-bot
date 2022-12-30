@@ -1,0 +1,16 @@
+{
+  "name": "y",
+  "version": "1.0.0",
+  "description": "",
+  "main": "mint.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node private_table.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "ethers": "^5.7.2"
+  }
+}
