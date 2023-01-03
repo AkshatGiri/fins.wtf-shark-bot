@@ -2,6 +2,12 @@ require('dotenv').config()
 const fs = require('fs')
 const { BigNumber, providers, Wallet, Contract, utils } = require('ethers')
 
+function log(){
+  const time = new Date().toLocaleString()
+  console.log(time, ...arguments)
+}
+
+
 const { INFURA_API_KEY, WALLET_PRIVATE_KEY } = process.env
 if (!INFURA_API_KEY || !WALLET_PRIVATE_KEY) {
   throw new Error('Missing .env values')
@@ -23,7 +29,7 @@ const wallet = new Wallet(WALLET_PRIVATE_KEY, provider)
 
 const contract = new Contract(CONTRACT.address, CONTRACT.abi, wallet)
 
-console.log('Watching...')
+log('Watching...')
 
 //////////////////////////
 //////////////////////////
@@ -66,32 +72,37 @@ async function mintDrink() {
 // if not, mint it.
 
 let timer = setInterval(async () => {
-  const isBarOpen = await getIsBarOpen()
-  const isBarOnlyFins = await getIsBarOnlyFins()
+  try {
+    const isBarOpen = await getIsBarOpen()
 
-  if (!isBarOpen || !isBarOnlyFins) {
-    console.log('Bar is closed!')
-    clearInterval(timer)
-    return
-  }
+    if (!isBarOpen) {
+      log('Bar is closed!')
+      clearInterval(timer)
+      return
+    }
 
-  const currentDrinkId = await getCurrentRoundDrinkId()
-  const hasMintedDrink = (
-    await getBalanceOfDrink(wallet.address, currentDrinkId.toNumber())
-  ).gt(0)
+    const currentDrinkId = await getCurrentRoundDrinkId()
+    const hasMintedDrink = (
+      await getBalanceOfDrink(wallet.address, currentDrinkId.toNumber())
+    ).gt(0)
 
-  if (hasMintedDrink) {
-    console.log(`Already minted drink ${currentDrinkId.toString()}`)
-    return
-  }
+    if (hasMintedDrink) {
+      log(`Already minted drink ${currentDrinkId.toString()}`)
+      return
+    }
 
-  console.log(`Minting drink ${currentDrinkId.toNumber()}...`)
-  const tx = await mintDrink()
-  console.log(`Transaction Sent : ${tx.hash}`)
-  // wait for transaction to be confrimed
-  tx.wait().then((receipt) => {
-    console.log(
+    log(`Minting drink ${currentDrinkId.toNumber()}...`)
+    const tx = await mintDrink()
+    log(`Transaction Sent : ${tx.hash}`)
+    // wait for transaction to be confrimed
+    const receipt = await tx.wait()
+    log(
       `Transaction ${tx.hash} confirmed in block ${receipt.blockNumber}!`,
     )
-  })
-}, 10000)
+  } catch (e) {
+    log(e)
+  }
+}, 30000)
+
+// TODO: Fire the check on block change event or slightly before it
+// TODO: Keep track of script state ( idle, sending transaction, waitting for confirmation, etc. ) to not send multiple transactions for the same drink.
