@@ -10,6 +10,10 @@ Clone the project
 git clone https://github.com/AkshatGiri/fins.wtf-shark-bot.git
 ```
 
+```
+cd fins.wtf-shark-bot && npm install
+```
+
 Create a .env file in the folder and plug in the values
 
 ```
